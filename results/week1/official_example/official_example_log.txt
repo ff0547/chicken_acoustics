@@ -1,0 +1,10 @@
+﻿Official Pyroomacoustics beamforming_time_domain example
+Date: 06/23/2026 17:50:32
+Command: python external\pyroomacoustics\examples\beamforming_time_domain.py
+Direct SNR for good source: 13.68283991205441
+Generated WAV files: input.wav, output_DirectMVDR.wav, output_RakeMVDR.wav, output_DirectPerceptual.wav, output_RakePerceptual.wav
+Generated figure: spectrograms.png
+Saved RIR file: official_rir.npy
+Modification: changed absorption=absorption to materials=pra.Material(energy_absorption=absorption), and changed shape is Circular to shape == Circular.
+Reason: pyroomacoustics 0.10.1 uses the materials= API instead of the old absorption= API.
+Status: completed successfully.
