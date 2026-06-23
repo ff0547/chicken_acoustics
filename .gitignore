@@ -1,0 +1,51 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# PyCharm
+.idea/
+
+# Conda local files
+.conda/
+
+# Raw datasets
+data/raw_sources/
+data/raw_noise/
+
+# Processed and simulated data
+data/processed_sources/
+data/simulated/
+
+# Large result files
+results/**/*.wav
+results/**/*.mp3
+results/**/*.flac
+results/**/*.npy
+results/**/*.npz
+results/**/*.pt
+results/**/*.pth
+results/**/*.ckpt
+
+# General large files
+*.wav
+*.mp3
+*.flac
+*.npy
+*.npz
+*.pt
+*.pth
+*.ckpt
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
