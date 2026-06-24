@@ -1,0 +1,2 @@
+﻿dataset_name,source_url,license,license_status,decision,reason
+ChickenLanguageDataset,https://github.com/zebular13/ChickenLanguageDataset,unknown,unclear,excluded_from_formal_manifest,License was not confirmed. Files are kept only as candidate data and excluded from source_manifest.csv.

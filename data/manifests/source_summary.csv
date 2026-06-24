@@ -1,0 +1,6 @@
+﻿source_id,dataset_name,license,label,file_count,total_duration_sec,min_sample_rate_hz,max_sample_rate_hz,total_duration_min
+mendeley_poultry_vocalization,Poultry Vocalization Signal Dataset for Early Disease Detection,CC BY 4.0,healthy,139,4654.069,48000,48000,77.568
+mendeley_poultry_vocalization,Poultry Vocalization Signal Dataset for Early Disease Detection,CC BY 4.0,noise,86,3248.804,48000,48000,54.147
+mendeley_poultry_vocalization,Poultry Vocalization Signal Dataset for Early Disease Detection,CC BY 4.0,unhealthy,121,3478.586,48000,48000,57.976
+zenodo_laying_hens_stress,Vocalization Patterns in Laying Hens - An Analysis of Stress-Induced Audio Responses,CC BY 4.0,control,33,30714.688,44100,44100,511.911
+zenodo_laying_hens_stress,Vocalization Patterns in Laying Hens - An Analysis of Stress-Induced Audio Responses,CC BY 4.0,treatment,70,124957.179,44100,44100,2082.62

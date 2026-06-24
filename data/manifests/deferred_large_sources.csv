@@ -1,0 +1,2 @@
+﻿dataset_name,source_url,license,license_status,decision,reason
+ChickenSense,https://zenodo.org/records/8212853,CC BY 4.0,clear,deferred_not_downloaded,"Full Dataset.zip is about 68.9 GB. It is suitable for later large-scale real-world validation, but not required for Day2 manifest construction."
