@@ -1,0 +1,59 @@
+name: local_chicken_cage
+unit: meter
+coordinate_system:
+  origin: left_front_bottom_corner
+  x_axis: length_direction_left_to_right
+  y_axis: width_direction_front_to_back
+  z_axis: height_direction_bottom_to_top
+  description: 局部坐标系原点位于鸡笼左前下角，单位为米。
+dimensions:
+  length_x: 2.4
+  width_y: 1.2
+  height_z: 1.8
+valid_range:
+  x:
+  - 0.0
+  - 2.4
+  y:
+  - 0.0
+  - 1.2
+  z:
+  - 0.0
+  - 1.8
+reference_points:
+  left_front_bottom:
+  - 0.0
+  - 0.0
+  - 0.0
+  right_front_bottom:
+  - 2.4
+  - 0.0
+  - 0.0
+  left_back_bottom:
+  - 0.0
+  - 1.2
+  - 0.0
+  right_back_bottom:
+  - 2.4
+  - 1.2
+  - 0.0
+  left_front_top:
+  - 0.0
+  - 0.0
+  - 1.8
+  right_front_top:
+  - 2.4
+  - 0.0
+  - 1.8
+  left_back_top:
+  - 0.0
+  - 1.2
+  - 1.8
+  right_back_top:
+  - 2.4
+  - 1.2
+  - 1.8
+notes:
+- 本配置用于第1周第4天坐标系与麦克风布局实验。
+- 所有麦克风坐标必须位于 valid_range 指定范围内。
+- 后续 Pyroomacoustics 仿真可直接读取 dimensions 与 mic_layouts。

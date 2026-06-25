@@ -1,0 +1,172 @@
+unit: meter
+coordinate_order:
+- x
+- y
+- z
+layouts:
+  mic_4:
+    description: 4麦克风四角布局，用于基础声源定位实验。
+    height_z: 1.2
+    microphones:
+    - id: M01
+      position:
+      - 0.2
+      - 0.2
+      - 1.2
+    - id: M02
+      position:
+      - 2.2
+      - 0.2
+      - 1.2
+    - id: M03
+      position:
+      - 0.2
+      - 1.0
+      - 1.2
+    - id: M04
+      position:
+      - 2.2
+      - 1.0
+      - 1.2
+  mic_6:
+    description: 6麦克风两排三列布局，增强长度方向定位能力。
+    height_z: 1.2
+    microphones:
+    - id: M01
+      position:
+      - 0.2
+      - 0.2
+      - 1.2
+    - id: M02
+      position:
+      - 1.2
+      - 0.2
+      - 1.2
+    - id: M03
+      position:
+      - 2.2
+      - 0.2
+      - 1.2
+    - id: M04
+      position:
+      - 0.2
+      - 1.0
+      - 1.2
+    - id: M05
+      position:
+      - 1.2
+      - 1.0
+      - 1.2
+    - id: M06
+      position:
+      - 2.2
+      - 1.0
+      - 1.2
+  mic_8:
+    description: 8麦克风四角加边中点布局，兼顾覆盖范围和定位稳定性。
+    height_z: 1.2
+    microphones:
+    - id: M01
+      position:
+      - 0.2
+      - 0.2
+      - 1.2
+    - id: M02
+      position:
+      - 1.2
+      - 0.2
+      - 1.2
+    - id: M03
+      position:
+      - 2.2
+      - 0.2
+      - 1.2
+    - id: M04
+      position:
+      - 0.2
+      - 0.6
+      - 1.2
+    - id: M05
+      position:
+      - 2.2
+      - 0.6
+      - 1.2
+    - id: M06
+      position:
+      - 0.2
+      - 1.0
+      - 1.2
+    - id: M07
+      position:
+      - 1.2
+      - 1.0
+      - 1.2
+    - id: M08
+      position:
+      - 2.2
+      - 1.0
+      - 1.2
+  mic_12:
+    description: 12麦克风三排四列布局，用于更密集的二维定位和后续波束形成实验。
+    height_z: 1.2
+    microphones:
+    - id: M01
+      position:
+      - 0.2
+      - 0.2
+      - 1.2
+    - id: M02
+      position:
+      - 0.8
+      - 0.2
+      - 1.2
+    - id: M03
+      position:
+      - 1.6
+      - 0.2
+      - 1.2
+    - id: M04
+      position:
+      - 2.2
+      - 0.2
+      - 1.2
+    - id: M05
+      position:
+      - 0.2
+      - 0.6
+      - 1.2
+    - id: M06
+      position:
+      - 0.8
+      - 0.6
+      - 1.2
+    - id: M07
+      position:
+      - 1.6
+      - 0.6
+      - 1.2
+    - id: M08
+      position:
+      - 2.2
+      - 0.6
+      - 1.2
+    - id: M09
+      position:
+      - 0.2
+      - 1.0
+      - 1.2
+    - id: M10
+      position:
+      - 0.8
+      - 1.0
+      - 1.2
+    - id: M11
+      position:
+      - 1.6
+      - 1.0
+      - 1.2
+    - id: M12
+      position:
+      - 2.2
+      - 1.0
+      - 1.2
