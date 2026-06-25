@@ -3,170 +3,385 @@ coordinate_order:
 - x
 - y
 - z
+baseline_layout: mic_8
+baseline_description: 鸡笼四周分布式 8 麦克风布局
+notes:
+- mic_4/mic_6/mic_8/mic_12 用于 E1 麦克风数量实验。
+- layout_corners_8/layout_sides_8/layout_single_side_8/layout_compact_8 用于 E2 布局实验。
+- 所有布局均位于 1.20 × 0.75 × 0.60 m 鸡笼局部坐标范围内。
+- 所有麦克风默认安装高度为 z=0.50 m。
 layouts:
   mic_4:
-    description: 4麦克风四角布局，用于基础声源定位实验。
-    height_z: 1.2
+    name: mic_4
+    description: 4 麦克风四角布局，用于 E1 麦克风数量实验。
+    layout_family: mic_count
+    variable_for: E1_num_mics
+    height_z: 0.5
+    expected_mic_count: 4
     microphones:
     - id: M01
       position:
-      - 0.2
-      - 0.2
-      - 1.2
+      - 0.08
+      - 0.08
+      - 0.5
     - id: M02
       position:
-      - 2.2
-      - 0.2
-      - 1.2
+      - 1.12
+      - 0.08
+      - 0.5
     - id: M03
       position:
-      - 0.2
-      - 1.0
-      - 1.2
+      - 0.08
+      - 0.67
+      - 0.5
     - id: M04
       position:
-      - 2.2
-      - 1.0
-      - 1.2
+      - 1.12
+      - 0.67
+      - 0.5
   mic_6:
-    description: 6麦克风两排三列布局，增强长度方向定位能力。
-    height_z: 1.2
+    name: mic_6
+    description: 6 麦克风两侧三点布局，用于 E1 麦克风数量实验。
+    layout_family: mic_count
+    variable_for: E1_num_mics
+    height_z: 0.5
+    expected_mic_count: 6
     microphones:
     - id: M01
       position:
-      - 0.2
-      - 0.2
-      - 1.2
+      - 0.08
+      - 0.08
+      - 0.5
     - id: M02
       position:
-      - 1.2
-      - 0.2
-      - 1.2
+      - 0.6
+      - 0.08
+      - 0.5
     - id: M03
       position:
-      - 2.2
-      - 0.2
-      - 1.2
+      - 1.12
+      - 0.08
+      - 0.5
     - id: M04
       position:
-      - 0.2
-      - 1.0
-      - 1.2
+      - 0.08
+      - 0.67
+      - 0.5
     - id: M05
       position:
-      - 1.2
-      - 1.0
-      - 1.2
+      - 0.6
+      - 0.67
+      - 0.5
     - id: M06
       position:
-      - 2.2
-      - 1.0
-      - 1.2
+      - 1.12
+      - 0.67
+      - 0.5
   mic_8:
-    description: 8麦克风四角加边中点布局，兼顾覆盖范围和定位稳定性。
-    height_z: 1.2
+    name: mic_8
+    description: 基准 8 麦克风鸡笼四周分布式布局。
+    layout_family: mic_count
+    variable_for: E1_num_mics_and_baseline
+    height_z: 0.5
+    expected_mic_count: 8
     microphones:
     - id: M01
       position:
-      - 0.2
-      - 0.2
-      - 1.2
+      - 0.08
+      - 0.08
+      - 0.5
     - id: M02
       position:
-      - 1.2
-      - 0.2
-      - 1.2
+      - 0.6
+      - 0.08
+      - 0.5
     - id: M03
       position:
-      - 2.2
-      - 0.2
-      - 1.2
+      - 1.12
+      - 0.08
+      - 0.5
     - id: M04
       position:
-      - 0.2
-      - 0.6
-      - 1.2
+      - 0.08
+      - 0.375
+      - 0.5
     - id: M05
       position:
-      - 2.2
-      - 0.6
-      - 1.2
+      - 1.12
+      - 0.375
+      - 0.5
     - id: M06
       position:
-      - 0.2
-      - 1.0
-      - 1.2
+      - 0.08
+      - 0.67
+      - 0.5
     - id: M07
       position:
-      - 1.2
-      - 1.0
-      - 1.2
+      - 0.6
+      - 0.67
+      - 0.5
     - id: M08
       position:
-      - 2.2
-      - 1.0
-      - 1.2
+      - 1.12
+      - 0.67
+      - 0.5
   mic_12:
-    description: 12麦克风三排四列布局，用于更密集的二维定位和后续波束形成实验。
-    height_z: 1.2
+    name: mic_12
+    description: 12 麦克风三排四列分布式布局，用于 E1 麦克风数量实验。
+    layout_family: mic_count
+    variable_for: E1_num_mics
+    height_z: 0.5
+    expected_mic_count: 12
     microphones:
     - id: M01
       position:
-      - 0.2
-      - 0.2
-      - 1.2
+      - 0.08
+      - 0.08
+      - 0.5
     - id: M02
       position:
-      - 0.8
-      - 0.2
-      - 1.2
+      - 0.43
+      - 0.08
+      - 0.5
     - id: M03
       position:
-      - 1.6
-      - 0.2
-      - 1.2
+      - 0.77
+      - 0.08
+      - 0.5
     - id: M04
       position:
-      - 2.2
-      - 0.2
-      - 1.2
+      - 1.12
+      - 0.08
+      - 0.5
     - id: M05
       position:
-      - 0.2
-      - 0.6
-      - 1.2
+      - 0.08
+      - 0.375
+      - 0.5
     - id: M06
       position:
-      - 0.8
-      - 0.6
-      - 1.2
+      - 0.43
+      - 0.375
+      - 0.5
     - id: M07
       position:
-      - 1.6
-      - 0.6
-      - 1.2
+      - 0.77
+      - 0.375
+      - 0.5
     - id: M08
       position:
-      - 2.2
-      - 0.6
-      - 1.2
+      - 1.12
+      - 0.375
+      - 0.5
     - id: M09
       position:
-      - 0.2
-      - 1.0
-      - 1.2
+      - 0.08
+      - 0.67
+      - 0.5
     - id: M10
       position:
-      - 0.8
-      - 1.0
-      - 1.2
+      - 0.43
+      - 0.67
+      - 0.5
     - id: M11
       position:
-      - 1.6
-      - 1.0
-      - 1.2
+      - 0.77
+      - 0.67
+      - 0.5
     - id: M12
       position:
-      - 2.2
-      - 1.0
-      - 1.2
+      - 1.12
+      - 0.67
+      - 0.5
+  layout_corners_8:
+    name: layout_corners_8
+    description: 8 麦克风四角强化布局，用于 E2 布局实验。
+    layout_family: layout_variant
+    variable_for: E2_layout
+    height_z: 0.5
+    expected_mic_count: 8
+    microphones:
+    - id: M01
+      position:
+      - 0.08
+      - 0.08
+      - 0.5
+    - id: M02
+      position:
+      - 0.25
+      - 0.08
+      - 0.5
+    - id: M03
+      position:
+      - 0.95
+      - 0.08
+      - 0.5
+    - id: M04
+      position:
+      - 1.12
+      - 0.08
+      - 0.5
+    - id: M05
+      position:
+      - 0.08
+      - 0.67
+      - 0.5
+    - id: M06
+      position:
+      - 0.25
+      - 0.67
+      - 0.5
+    - id: M07
+      position:
+      - 0.95
+      - 0.67
+      - 0.5
+    - id: M08
+      position:
+      - 1.12
+      - 0.67
+      - 0.5
+  layout_sides_8:
+    name: layout_sides_8
+    description: 8 麦克风两侧分布式布局，用于 E2 布局实验。
+    layout_family: layout_variant
+    variable_for: E2_layout
+    height_z: 0.5
+    expected_mic_count: 8
+    microphones:
+    - id: M01
+      position:
+      - 0.08
+      - 0.08
+      - 0.5
+    - id: M02
+      position:
+      - 0.43
+      - 0.08
+      - 0.5
+    - id: M03
+      position:
+      - 0.77
+      - 0.08
+      - 0.5
+    - id: M04
+      position:
+      - 1.12
+      - 0.08
+      - 0.5
+    - id: M05
+      position:
+      - 0.08
+      - 0.67
+      - 0.5
+    - id: M06
+      position:
+      - 0.43
+      - 0.67
+      - 0.5
+    - id: M07
+      position:
+      - 0.77
+      - 0.67
+      - 0.5
+    - id: M08
+      position:
+      - 1.12
+      - 0.67
+      - 0.5
+  layout_single_side_8:
+    name: layout_single_side_8
+    description: 8 麦克风单边线阵布局，用于 E2 布局实验。
+    layout_family: layout_variant
+    variable_for: E2_layout
+    height_z: 0.5
+    expected_mic_count: 8
+    microphones:
+    - id: M01
+      position:
+      - 0.08
+      - 0.08
+      - 0.5
+    - id: M02
+      position:
+      - 0.23
+      - 0.08
+      - 0.5
+    - id: M03
+      position:
+      - 0.38
+      - 0.08
+      - 0.5
+    - id: M04
+      position:
+      - 0.53
+      - 0.08
+      - 0.5
+    - id: M05
+      position:
+      - 0.68
+      - 0.08
+      - 0.5
+    - id: M06
+      position:
+      - 0.83
+      - 0.08
+      - 0.5
+    - id: M07
+      position:
+      - 0.98
+      - 0.08
+      - 0.5
+    - id: M08
+      position:
+      - 1.12
+      - 0.08
+      - 0.5
+  layout_compact_8:
+    name: layout_compact_8
+    description: 8 麦克风中心集中阵列布局，用于 E2 布局实验。
+    layout_family: layout_variant
+    variable_for: E2_layout
+    height_z: 0.5
+    expected_mic_count: 8
+    microphones:
+    - id: M01
+      position:
+      - 0.48
+      - 0.3
+      - 0.5
+    - id: M02
+      position:
+      - 0.56
+      - 0.3
+      - 0.5
+    - id: M03
+      position:
+      - 0.64
+      - 0.3
+      - 0.5
+    - id: M04
+      position:
+      - 0.72
+      - 0.3
+      - 0.5
+    - id: M05
+      position:
+      - 0.48
+      - 0.45
+      - 0.5
+    - id: M06
+      position:
+      - 0.56
+      - 0.45
+      - 0.5
+    - id: M07
+      position:
+      - 0.64
+      - 0.45
+      - 0.5
+    - id: M08
+      position:
+      - 0.72
+      - 0.45
+      - 0.5

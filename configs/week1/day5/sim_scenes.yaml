@@ -1,0 +1,1008 @@
+name: week1_day5_simulation_scenes
+description: 第1周第5天仿真器功能验证场景，同时预留论文级实验元数据。
+run_mode: week1_day5_function_check
+paper_ready_metadata: true
+global_seed: 20260625
+num_scenes: 20
+scene_duration_sec: 7.0
+note: 当前仅生成20个测试场景，用于验证仿真器功能。论文级 E1～E10 每组50/100场景将在后续脚本中生成。
+planned_next_experiments:
+  E1:
+    task: single_source_localization
+    variable: num_mics
+    values:
+    - mic_4
+    - mic_6
+    - mic_8
+    - mic_12
+    paper_sample_size_per_group: 100
+    metrics:
+    - MAE_cm
+    - P90_cm
+    - Hit@10cm
+  E2:
+    task: single_source_localization
+    variable: layout
+    values:
+    - layout_corners_8
+    - layout_sides_8
+    - layout_single_side_8
+    - layout_compact_8
+    paper_sample_size_per_group: 100
+    metrics:
+    - error_cm
+    - runtime_sec
+  E3:
+    task: single_source_localization
+    variable: snr_db
+    values:
+    - 0
+    - 5
+    - 10
+    - 20
+    - 30
+    paper_sample_size_per_group: 100
+    metrics:
+    - error_cm
+    - miss_rate
+  E4:
+    task: dual_source_localization
+    variable: source_distance_cm
+    values:
+    - 10
+    - 20
+    - 30
+    - 50
+    - 80
+    paper_sample_size_per_group: 100
+    metrics:
+    - dual_source_hit_rate
+    - false_alarm_rate
+  E5:
+    task: localization_rt60
+    variable: rt60_sec
+    values:
+    - 0.1
+    - 0.3
+    - 0.5
+    - 0.7
+    paper_sample_size_per_group: 100
+    metrics:
+    - error_cm
+    - peak_ratio
+  E6:
+    task: reconstruction
+    variable: method
+    values:
+    - single_channel
+    - DAS
+    - MVDR
+    - LCMV
+    paper_sample_size_per_group: 100
+    metrics:
+    - SI_SDRi
+    - LogMel_distance
+  E7:
+    task: reconstruction_position_error
+    variable: position_error_cm
+    values:
+    - 0
+    - 5
+    - 10
+    - 15
+    paper_sample_size_per_group: 100
+    metrics:
+    - SI_SDRi_drop
+  E8:
+    task: joint_localization_and_separation
+    variable: num_active_sources
+    values:
+    - 1
+    - 2
+    - 3
+    paper_sample_size_per_group: 100
+    metrics:
+    - joint_success_rate
+  E9:
+    task: deep_method
+    variable: position_encoding
+    values:
+    - none
+    - with_position
+    - position_perturbation
+    paper_sample_size_per_group: unified_test_set
+    metrics:
+    - SI_SDRi
+    - spectral_error
+  E10:
+    task: complexity
+    variable: grid_and_num_mics
+    values: multiple_combinations
+    paper_sample_size_per_group: unified_hardware
+    metrics:
+    - real_time_factor
+    - memory_mb
+scenes:
+- scene_id: scene_001
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20260625
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W2_D2_PoS_1_seg053.wav
+    position:
+    - 0.568
+    - 0.144
+    - 0.35
+    x_gt: 0.568
+    y_gt: 0.144
+    z_gt: 0.35
+    x_gt_2d: 0.568
+    y_gt_2d: 0.144
+    delay_sec: 1.417
+    gain: 0.869
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PoststressControl\Ctrl_W4_D3_PoS_1_seg019.wav
+    position:
+    - 0.943
+    - 0.647
+    - 0.35
+    x_gt: 0.943
+    y_gt: 0.647
+    z_gt: 0.35
+    x_gt_2d: 0.943
+    y_gt_2d: 0.647
+    delay_sec: 1.369
+    gain: 1.09
+- scene_id: scene_002
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20260722
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W1_D1_PrS_2_seg089.wav
+    position:
+    - 0.895
+    - 0.539
+    - 0.35
+    x_gt: 0.895
+    y_gt: 0.539
+    z_gt: 0.35
+    x_gt_2d: 0.895
+    y_gt_2d: 0.539
+    delay_sec: 0.615
+    gain: 1.197
+- scene_id: scene_003
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20260819
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W2_D2_PrS_seg497.wav
+    position:
+    - 0.801
+    - 0.656
+    - 0.35
+    x_gt: 0.801
+    y_gt: 0.656
+    z_gt: 0.35
+    x_gt_2d: 0.801
+    y_gt_2d: 0.656
+    delay_sec: 1.079
+    gain: 1.079
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W4_D3_PoS_seg051.wav
+    position:
+    - 0.53
+    - 0.583
+    - 0.35
+    x_gt: 0.53
+    y_gt: 0.583
+    z_gt: 0.35
+    x_gt_2d: 0.53
+    y_gt_2d: 0.583
+    delay_sec: 0.827
+    gain: 0.911
+- scene_id: scene_004
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20260916
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W2_D1_PrS_seg132.wav
+    position:
+    - 0.256
+    - 0.367
+    - 0.35
+    x_gt: 0.256
+    y_gt: 0.367
+    z_gt: 0.35
+    x_gt_2d: 0.256
+    y_gt_2d: 0.367
+    delay_sec: 0.253
+    gain: 1.0
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PoststressControl\Ctrl_W4_D3_PoS_2_seg190.wav
+    position:
+    - 0.27
+    - 0.428
+    - 0.35
+    x_gt: 0.27
+    y_gt: 0.428
+    z_gt: 0.35
+    x_gt_2d: 0.27
+    y_gt_2d: 0.428
+    delay_sec: 0.778
+    gain: 1.01
+- scene_id: scene_005
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261013
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W2_D1_PoS_2_seg173.wav
+    position:
+    - 0.479
+    - 0.24
+    - 0.35
+    x_gt: 0.479
+    y_gt: 0.24
+    z_gt: 0.35
+    x_gt_2d: 0.479
+    y_gt_2d: 0.24
+    delay_sec: 0.164
+    gain: 1.063
+- scene_id: scene_006
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261110
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W2_D1_PrS_seg479.wav
+    position:
+    - 0.997
+    - 0.232
+    - 0.35
+    x_gt: 0.997
+    y_gt: 0.232
+    z_gt: 0.35
+    x_gt_2d: 0.997
+    y_gt_2d: 0.232
+    delay_sec: 1.062
+    gain: 0.967
+  - source_id: S02
+    audio_path: data\processed_segments\mendeley_poultry_vocalization\Unhealthy\37_seg005.wav
+    position:
+    - 0.305
+    - 0.1
+    - 0.35
+    x_gt: 0.305
+    y_gt: 0.1
+    z_gt: 0.35
+    x_gt_2d: 0.305
+    y_gt_2d: 0.1
+    delay_sec: 1.024
+    gain: 0.7
+- scene_id: scene_007
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261207
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W3_D2_PrS_1_seg166.wav
+    position:
+    - 0.489
+    - 0.327
+    - 0.35
+    x_gt: 0.489
+    y_gt: 0.327
+    z_gt: 0.35
+    x_gt_2d: 0.489
+    y_gt_2d: 0.327
+    delay_sec: 0.4
+    gain: 0.877
+- scene_id: scene_008
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261304
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W1_D1_PoS_2_seg168.wav
+    position:
+    - 1.024
+    - 0.607
+    - 0.35
+    x_gt: 1.024
+    y_gt: 0.607
+    z_gt: 0.35
+    x_gt_2d: 1.024
+    y_gt_2d: 0.607
+    delay_sec: 1.028
+    gain: 0.988
+- scene_id: scene_009
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261401
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PrestressControl\Ctrl_W4_D1_PrS_3_seg148.wav
+    position:
+    - 0.796
+    - 0.427
+    - 0.35
+    x_gt: 0.796
+    y_gt: 0.427
+    z_gt: 0.35
+    x_gt_2d: 0.796
+    y_gt_2d: 0.427
+    delay_sec: 1.475
+    gain: 1.146
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PoststressControl\Ctrl_W4_D2_PoS_3_seg107.wav
+    position:
+    - 1.04
+    - 0.185
+    - 0.35
+    x_gt: 1.04
+    y_gt: 0.185
+    z_gt: 0.35
+    x_gt_2d: 1.04
+    y_gt_2d: 0.185
+    delay_sec: 0.763
+    gain: 1.135
+- scene_id: scene_010
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261498
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PoststressControl\Ctrl_W5_D1_PoS_1_seg183.wav
+    position:
+    - 0.742
+    - 0.161
+    - 0.35
+    x_gt: 0.742
+    y_gt: 0.161
+    z_gt: 0.35
+    x_gt_2d: 0.742
+    y_gt_2d: 0.161
+    delay_sec: 1.497
+    gain: 0.624
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W3_D2_PrS_seg369.wav
+    position:
+    - 1.008
+    - 0.513
+    - 0.35
+    x_gt: 1.008
+    y_gt: 0.513
+    z_gt: 0.35
+    x_gt_2d: 1.008
+    y_gt_2d: 0.513
+    delay_sec: 0.922
+    gain: 1.122
+- scene_id: scene_011
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261595
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W1_D1_PrS_3_seg040.wav
+    position:
+    - 0.337
+    - 0.336
+    - 0.35
+    x_gt: 0.337
+    y_gt: 0.336
+    z_gt: 0.35
+    x_gt_2d: 0.337
+    y_gt_2d: 0.336
+    delay_sec: 0.722
+    gain: 0.908
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PrestressControl\Ctrl_W4_D2_PrS_3_seg051.wav
+    position:
+    - 0.185
+    - 0.161
+    - 0.35
+    x_gt: 0.185
+    y_gt: 0.161
+    z_gt: 0.35
+    x_gt_2d: 0.185
+    y_gt_2d: 0.161
+    delay_sec: 0.176
+    gain: 0.807
+- scene_id: scene_012
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261692
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W1_D1_PoS_2_seg051.wav
+    position:
+    - 0.928
+    - 0.643
+    - 0.35
+    x_gt: 0.928
+    y_gt: 0.643
+    z_gt: 0.35
+    x_gt_2d: 0.928
+    y_gt_2d: 0.643
+    delay_sec: 1.148
+    gain: 1.066
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W4_D2_PrS_seg354.wav
+    position:
+    - 0.497
+    - 0.54
+    - 0.35
+    x_gt: 0.497
+    y_gt: 0.54
+    z_gt: 0.35
+    x_gt_2d: 0.497
+    y_gt_2d: 0.54
+    delay_sec: 0.846
+    gain: 1.075
+- scene_id: scene_013
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261789
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W1_D1_PrS_seg117.wav
+    position:
+    - 0.107
+    - 0.167
+    - 0.35
+    x_gt: 0.107
+    y_gt: 0.167
+    z_gt: 0.35
+    x_gt_2d: 0.107
+    y_gt_2d: 0.167
+    delay_sec: 1.13
+    gain: 0.732
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W5_D1_PrS_seg290.wav
+    position:
+    - 0.099
+    - 0.271
+    - 0.35
+    x_gt: 0.099
+    y_gt: 0.271
+    z_gt: 0.35
+    x_gt_2d: 0.099
+    y_gt_2d: 0.271
+    delay_sec: 0.687
+    gain: 0.907
+- scene_id: scene_014
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261886
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PrestressControl\Ctrl_W5_D1_PrS_3_seg159.wav
+    position:
+    - 1.119
+    - 0.475
+    - 0.35
+    x_gt: 1.119
+    y_gt: 0.475
+    z_gt: 0.35
+    x_gt_2d: 1.119
+    y_gt_2d: 0.475
+    delay_sec: 0.713
+    gain: 0.684
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W2_D2_PrS_seg263.wav
+    position:
+    - 0.391
+    - 0.381
+    - 0.35
+    x_gt: 0.391
+    y_gt: 0.381
+    z_gt: 0.35
+    x_gt_2d: 0.391
+    y_gt_2d: 0.381
+    delay_sec: 0.822
+    gain: 1.141
+- scene_id: scene_015
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20261983
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\mendeley_poultry_vocalization\Healthy\18_seg001.wav
+    position:
+    - 0.702
+    - 0.334
+    - 0.35
+    x_gt: 0.702
+    y_gt: 0.334
+    z_gt: 0.35
+    x_gt_2d: 0.702
+    y_gt_2d: 0.334
+    delay_sec: 1.032
+    gain: 0.889
+- scene_id: scene_016
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20262080
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt1_W3_D1_PrS_seg568.wav
+    position:
+    - 0.41
+    - 0.153
+    - 0.35
+    x_gt: 0.41
+    y_gt: 0.153
+    z_gt: 0.35
+    x_gt_2d: 0.41
+    y_gt_2d: 0.153
+    delay_sec: 1.213
+    gain: 0.878
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Control\PrestressControl\Ctrl_W4_D3_PrS_1_seg009.wav
+    position:
+    - 0.488
+    - 0.615
+    - 0.35
+    x_gt: 0.488
+    y_gt: 0.615
+    z_gt: 0.35
+    x_gt_2d: 0.488
+    y_gt_2d: 0.615
+    delay_sec: 0.192
+    gain: 0.718
+- scene_id: scene_017
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20262177
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W3_D2_PrS_2_seg100.wav
+    position:
+    - 0.323
+    - 0.42
+    - 0.35
+    x_gt: 0.323
+    y_gt: 0.42
+    z_gt: 0.35
+    x_gt_2d: 0.323
+    y_gt_2d: 0.42
+    delay_sec: 0.251
+    gain: 1.124
+- scene_id: scene_018
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20262274
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W1_D1_PrS_2_seg147.wav
+    position:
+    - 0.398
+    - 0.266
+    - 0.35
+    x_gt: 0.398
+    y_gt: 0.266
+    z_gt: 0.35
+    x_gt_2d: 0.398
+    y_gt_2d: 0.266
+    delay_sec: 1.242
+    gain: 0.677
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W4_D1_PoS_seg058.wav
+    position:
+    - 0.578
+    - 0.373
+    - 0.35
+    x_gt: 0.578
+    y_gt: 0.373
+    z_gt: 0.35
+    x_gt_2d: 0.578
+    y_gt_2d: 0.373
+    delay_sec: 1.21
+    gain: 1.068
+- scene_id: scene_019
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_single_source_mic_8
+  task_type: simulation_function_check
+  scene_type: single_source
+  planned_metrics:
+  - localization_error_2d_cm
+  - MAE_cm
+  - P90_cm
+  - Hit@10cm
+  - Hit@20cm
+  - miss_rate
+  - false_alarm_rate
+  seed: 20262371
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 1
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W2_D3_PrS_2_seg015.wav
+    position:
+    - 0.434
+    - 0.202
+    - 0.35
+    x_gt: 0.434
+    y_gt: 0.202
+    z_gt: 0.35
+    x_gt_2d: 0.434
+    y_gt_2d: 0.202
+    delay_sec: 1.284
+    gain: 1.026
+- scene_id: scene_020
+  run_mode: week1_day5_function_check
+  paper_ready_metadata: true
+  experiment_id: W1D5
+  group_id: W1D5_dual_source_mic_8
+  task_type: simulation_function_check
+  scene_type: dual_source
+  planned_metrics:
+  - multi_source_localization_error_2d_cm
+  - source_count_error
+  - multi_source_hit_rate
+  - miss_rate
+  - false_alarm_rate
+  seed: 20262468
+  global_seed: 20260625
+  fs: 48000
+  duration_sec: 7.0
+  mic_layout: mic_8
+  rt60_sec: 0.3
+  snr_db: 20.0
+  num_sources: 2
+  sources:
+  - source_id: S01
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PoststressTreatment\Trt2_W4_D3_PoS_seg417.wav
+    position:
+    - 1.096
+    - 0.289
+    - 0.35
+    x_gt: 1.096
+    y_gt: 0.289
+    z_gt: 0.35
+    x_gt_2d: 1.096
+    y_gt_2d: 0.289
+    delay_sec: 0.202
+    gain: 0.657
+  - source_id: S02
+    audio_path: data\processed_segments\zenodo_laying_hens_stress\Treatment\PrestressTreatment\Trt2_W5_D1_PrS_seg094.wav
+    position:
+    - 0.624
+    - 0.6
+    - 0.35
+    x_gt: 0.624
+    y_gt: 0.6
+    z_gt: 0.35
+    x_gt_2d: 0.624
+    y_gt_2d: 0.6
+    delay_sec: 1.361
+    gain: 1.167

@@ -2,29 +2,42 @@
 """
 第 1 周第 4 天：坐标系与麦克风布局
 
+论文级基准场景版本。
+
 功能：
-1. 定义鸡笼局部三维坐标系
-2. 生成 cage.yaml
-3. 设计 4 / 6 / 8 / 12 麦克风布局
-4. 生成 mic_layouts.yaml
-5. 检查所有麦克风坐标是否合法
-6. 绘制俯视布局图
-7. 输出布局合法性报告
+1. 定义鸡笼局部三维坐标系；
+2. 生成 cage.yaml；
+3. 设计 4 / 6 / 8 / 12 麦克风数量布局；
+4. 设计 E2 所需的四角 / 两侧 / 单边 / 集中阵列布局；
+5. 生成 mic_layouts.yaml；
+6. 检查所有麦克风坐标是否合法；
+7. 绘制俯视布局图；
+8. 输出布局合法性报告。
 
 坐标系约定：
-- 单位：米
-- 原点 O = 鸡笼左前下角
-- x 轴：沿鸡笼长度方向，向右为正
-- y 轴：沿鸡笼宽度方向，向后为正
-- z 轴：沿鸡笼高度方向，向上为正
+- 单位：米；
+- 原点 O = 鸡笼左前下角；
+- x 轴：沿鸡笼长度方向，向右为正；
+- y 轴：沿鸡笼宽度方向，向后为正；
+- z 轴：沿鸡笼高度方向，向上为正。
+
+正式基准参数：
+- 鸡笼局部尺寸：1.20 × 0.75 × 0.60 m；
+- 发声平面：z = 0.35 m；
+- 发声高度实验值：0.25 / 0.35 / 0.45 m；
+- 基准麦克风数：8；
+- 基准布局：鸡笼四周分布式；
+- 采样率：48 kHz；
+- 基准 RT60：0.30 s；
+- 基准 SNR：20 dB；
+- 网格间距：2 cm；
+- STFT：2048 点，hop=512。
 """
 
 from pathlib import Path
 from typing import Dict, List, Tuple
 
 import yaml
-import numpy as np
-
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -42,8 +55,38 @@ RESULT_DIR = ROOT / "results" / "week1" / "day4" / "layouts"
 CAGE_YAML = CONFIG_DIR / "cage.yaml"
 MIC_LAYOUTS_YAML = CONFIG_DIR / "mic_layouts.yaml"
 
-LAYOUT_FIG = RESULT_DIR / "mic_layouts_top_view.png"
+MIC_COUNT_LAYOUT_FIG = RESULT_DIR / "mic_count_layouts_top_view.png"
+LAYOUT_VARIANTS_FIG = RESULT_DIR / "layout_variants_top_view.png"
 VALIDATION_REPORT = RESULT_DIR / "layout_validation_report.md"
+
+
+# =========================
+# 正式基准参数
+# =========================
+
+CAGE_LENGTH_X = 1.20
+CAGE_WIDTH_Y = 0.75
+CAGE_HEIGHT_Z = 0.60
+
+# 发声平面：后续仿真脚本 05 / 06 要读取这个值
+SOURCE_PLANE_Z = 0.35
+SOURCE_HEIGHT_VALUES = [0.25, 0.35, 0.45]
+
+# 麦克风安装高度：必须小于鸡笼高度 0.60 m
+MIC_HEIGHT_Z = 0.50
+
+# 麦克风离边界留一点距离，避免贴墙
+MARGIN_X = 0.08
+MARGIN_Y = 0.08
+
+# 常用坐标
+X_LEFT = MARGIN_X
+X_CENTER = CAGE_LENGTH_X / 2.0
+X_RIGHT = CAGE_LENGTH_X - MARGIN_X
+
+Y_FRONT = MARGIN_Y
+Y_CENTER = CAGE_WIDTH_Y / 2.0
+Y_BACK = CAGE_WIDTH_Y - MARGIN_Y
 
 
 # =========================
@@ -51,14 +94,9 @@ VALIDATION_REPORT = RESULT_DIR / "layout_validation_report.md"
 # =========================
 
 def build_cage_config() -> Dict:
-    """
-    构建鸡笼局部坐标系配置。
-
-    这里使用一个局部小型鸡笼/鸡舍区域作为实验空间。
-    后续如果实际尺寸变化，只需要改 length / width / height。
-    """
+    """构建鸡笼局部坐标系配置。"""
     cage = {
-        "name": "local_chicken_cage",
+        "name": "local_chicken_cage_paper_baseline",
         "unit": "meter",
         "coordinate_system": {
             "origin": "left_front_bottom_corner",
@@ -68,32 +106,87 @@ def build_cage_config() -> Dict:
             "description": "局部坐标系原点位于鸡笼左前下角，单位为米。"
         },
         "dimensions": {
-            "length_x": 2.40,
-            "width_y": 1.20,
-            "height_z": 1.80
+            "length_x": CAGE_LENGTH_X,
+            "width_y": CAGE_WIDTH_Y,
+            "height_z": CAGE_HEIGHT_Z
         },
         "valid_range": {
-            "x": [0.0, 2.40],
-            "y": [0.0, 1.20],
-            "z": [0.0, 1.80]
+            "x": [0.0, CAGE_LENGTH_X],
+            "y": [0.0, CAGE_WIDTH_Y],
+            "z": [0.0, CAGE_HEIGHT_Z]
+        },
+        "source_plane": {
+            "baseline_z": SOURCE_PLANE_Z,
+            "height_error_values": SOURCE_HEIGHT_VALUES,
+            "description": "后续仿真实验默认发声平面为 z=0.35 m，高度误差实验使用 0.25/0.35/0.45 m。"
+        },
+        "baseline_experiment_params": {
+            "fs": 48000,
+            "baseline_num_mics": 8,
+            "baseline_layout": "mic_8",
+            "baseline_layout_description": "鸡笼四周分布式 8 麦克风布局",
+            "baseline_rt60_sec": 0.30,
+            "rt60_values_sec": [0.10, 0.30, 0.50, 0.70],
+            "baseline_snr_db": 20,
+            "snr_values_db": [0, 5, 10, 20, 30],
+            "baseline_grid_spacing_m": 0.02,
+            "grid_spacing_values_m": [0.01, 0.02, 0.05],
+            "stft_n_fft": 2048,
+            "stft_hop_length": 512,
+            "stft_compare": {
+                "n_fft": 1024,
+                "hop_length": 256
+            }
         },
         "reference_points": {
             "left_front_bottom": [0.0, 0.0, 0.0],
-            "right_front_bottom": [2.40, 0.0, 0.0],
-            "left_back_bottom": [0.0, 1.20, 0.0],
-            "right_back_bottom": [2.40, 1.20, 0.0],
-            "left_front_top": [0.0, 0.0, 1.80],
-            "right_front_top": [2.40, 0.0, 1.80],
-            "left_back_top": [0.0, 1.20, 1.80],
-            "right_back_top": [2.40, 1.20, 1.80]
+            "right_front_bottom": [CAGE_LENGTH_X, 0.0, 0.0],
+            "left_back_bottom": [0.0, CAGE_WIDTH_Y, 0.0],
+            "right_back_bottom": [CAGE_LENGTH_X, CAGE_WIDTH_Y, 0.0],
+            "left_front_top": [0.0, 0.0, CAGE_HEIGHT_Z],
+            "right_front_top": [CAGE_LENGTH_X, 0.0, CAGE_HEIGHT_Z],
+            "left_back_top": [0.0, CAGE_WIDTH_Y, CAGE_HEIGHT_Z],
+            "right_back_top": [CAGE_LENGTH_X, CAGE_WIDTH_Y, CAGE_HEIGHT_Z]
         },
         "notes": [
             "本配置用于第1周第4天坐标系与麦克风布局实验。",
+            "鸡笼局部尺寸固定为 1.20 × 0.75 × 0.60 m。",
             "所有麦克风坐标必须位于 valid_range 指定范围内。",
-            "后续 Pyroomacoustics 仿真可直接读取 dimensions 与 mic_layouts。"
+            "后续 Pyroomacoustics 仿真必须读取本文件中的 dimensions、source_plane 和 baseline_experiment_params。"
         ]
     }
     return cage
+
+
+# =========================
+# 布局工具函数
+# =========================
+
+def mic(mic_id: str, x: float, y: float, z: float = MIC_HEIGHT_Z) -> Dict:
+    """生成单个麦克风字典。"""
+    return {
+        "id": mic_id,
+        "position": [round(float(x), 3), round(float(y), 3), round(float(z), 3)]
+    }
+
+
+def make_layout(
+    name: str,
+    description: str,
+    microphones: List[Dict],
+    layout_family: str,
+    variable_for: str
+) -> Dict:
+    """生成布局配置。"""
+    return {
+        "name": name,
+        "description": description,
+        "layout_family": layout_family,
+        "variable_for": variable_for,
+        "height_z": MIC_HEIGHT_Z,
+        "expected_mic_count": len(microphones),
+        "microphones": microphones
+    }
 
 
 # =========================
@@ -102,78 +195,175 @@ def build_cage_config() -> Dict:
 
 def build_mic_layouts() -> Dict:
     """
-    构建 4 / 6 / 8 / 12 麦克风布局。
+    构建论文级实验需要的麦克风布局。
 
-    设计原则：
-    - 所有麦克风均位于鸡笼内部合法范围；
-    - 默认高度 z = 1.20 m，略高于鸡只主要发声区域；
-    - 4 麦：四角布局，适合基础定位；
-    - 6 麦：前后两排各 3 个，提高长度方向分辨率；
-    - 8 麦：四角 + 边中点，提高空间覆盖；
-    - 12 麦：三排四列，提高二维定位与后续波束形成稳定性。
+    包含两类：
+    1. E1 麦克风数量实验：mic_4 / mic_6 / mic_8 / mic_12；
+    2. E2 布局实验：四角 / 两侧 / 单边 / 集中阵列，均以 8 麦为基准。
     """
+
+    # E1：不同麦克风数量
+    mic_4 = [
+        mic("M01", X_LEFT, Y_FRONT),
+        mic("M02", X_RIGHT, Y_FRONT),
+        mic("M03", X_LEFT, Y_BACK),
+        mic("M04", X_RIGHT, Y_BACK),
+    ]
+
+    mic_6 = [
+        mic("M01", X_LEFT, Y_FRONT),
+        mic("M02", X_CENTER, Y_FRONT),
+        mic("M03", X_RIGHT, Y_FRONT),
+        mic("M04", X_LEFT, Y_BACK),
+        mic("M05", X_CENTER, Y_BACK),
+        mic("M06", X_RIGHT, Y_BACK),
+    ]
+
+    # 基准 8 麦：鸡笼四周分布式
+    mic_8 = [
+        mic("M01", X_LEFT, Y_FRONT),
+        mic("M02", X_CENTER, Y_FRONT),
+        mic("M03", X_RIGHT, Y_FRONT),
+        mic("M04", X_LEFT, Y_CENTER),
+        mic("M05", X_RIGHT, Y_CENTER),
+        mic("M06", X_LEFT, Y_BACK),
+        mic("M07", X_CENTER, Y_BACK),
+        mic("M08", X_RIGHT, Y_BACK),
+    ]
+
+    mic_12 = [
+        mic("M01", X_LEFT, Y_FRONT),
+        mic("M02", 0.43, Y_FRONT),
+        mic("M03", 0.77, Y_FRONT),
+        mic("M04", X_RIGHT, Y_FRONT),
+
+        mic("M05", X_LEFT, Y_CENTER),
+        mic("M06", 0.43, Y_CENTER),
+        mic("M07", 0.77, Y_CENTER),
+        mic("M08", X_RIGHT, Y_CENTER),
+
+        mic("M09", X_LEFT, Y_BACK),
+        mic("M10", 0.43, Y_BACK),
+        mic("M11", 0.77, Y_BACK),
+        mic("M12", X_RIGHT, Y_BACK),
+    ]
+
+    # E2：布局实验，固定 8 麦
+    layout_corners_8 = [
+        mic("M01", X_LEFT, Y_FRONT),
+        mic("M02", 0.25, Y_FRONT),
+        mic("M03", 0.95, Y_FRONT),
+        mic("M04", X_RIGHT, Y_FRONT),
+        mic("M05", X_LEFT, Y_BACK),
+        mic("M06", 0.25, Y_BACK),
+        mic("M07", 0.95, Y_BACK),
+        mic("M08", X_RIGHT, Y_BACK),
+    ]
+
+    layout_sides_8 = [
+        mic("M01", X_LEFT, Y_FRONT),
+        mic("M02", 0.43, Y_FRONT),
+        mic("M03", 0.77, Y_FRONT),
+        mic("M04", X_RIGHT, Y_FRONT),
+        mic("M05", X_LEFT, Y_BACK),
+        mic("M06", 0.43, Y_BACK),
+        mic("M07", 0.77, Y_BACK),
+        mic("M08", X_RIGHT, Y_BACK),
+    ]
+
+    layout_single_side_8 = [
+        mic("M01", 0.08, Y_FRONT),
+        mic("M02", 0.23, Y_FRONT),
+        mic("M03", 0.38, Y_FRONT),
+        mic("M04", 0.53, Y_FRONT),
+        mic("M05", 0.68, Y_FRONT),
+        mic("M06", 0.83, Y_FRONT),
+        mic("M07", 0.98, Y_FRONT),
+        mic("M08", 1.12, Y_FRONT),
+    ]
+
+    layout_compact_8 = [
+        mic("M01", 0.48, 0.30),
+        mic("M02", 0.56, 0.30),
+        mic("M03", 0.64, 0.30),
+        mic("M04", 0.72, 0.30),
+        mic("M05", 0.48, 0.45),
+        mic("M06", 0.56, 0.45),
+        mic("M07", 0.64, 0.45),
+        mic("M08", 0.72, 0.45),
+    ]
+
     layouts = {
         "unit": "meter",
         "coordinate_order": ["x", "y", "z"],
+        "baseline_layout": "mic_8",
+        "baseline_description": "鸡笼四周分布式 8 麦克风布局",
+        "notes": [
+            "mic_4/mic_6/mic_8/mic_12 用于 E1 麦克风数量实验。",
+            "layout_corners_8/layout_sides_8/layout_single_side_8/layout_compact_8 用于 E2 布局实验。",
+            "所有布局均位于 1.20 × 0.75 × 0.60 m 鸡笼局部坐标范围内。",
+            "所有麦克风默认安装高度为 z=0.50 m。"
+        ],
         "layouts": {
-            "mic_4": {
-                "description": "4麦克风四角布局，用于基础声源定位实验。",
-                "height_z": 1.20,
-                "microphones": [
-                    {"id": "M01", "position": [0.20, 0.20, 1.20]},
-                    {"id": "M02", "position": [2.20, 0.20, 1.20]},
-                    {"id": "M03", "position": [0.20, 1.00, 1.20]},
-                    {"id": "M04", "position": [2.20, 1.00, 1.20]},
-                ]
-            },
-            "mic_6": {
-                "description": "6麦克风两排三列布局，增强长度方向定位能力。",
-                "height_z": 1.20,
-                "microphones": [
-                    {"id": "M01", "position": [0.20, 0.20, 1.20]},
-                    {"id": "M02", "position": [1.20, 0.20, 1.20]},
-                    {"id": "M03", "position": [2.20, 0.20, 1.20]},
-                    {"id": "M04", "position": [0.20, 1.00, 1.20]},
-                    {"id": "M05", "position": [1.20, 1.00, 1.20]},
-                    {"id": "M06", "position": [2.20, 1.00, 1.20]},
-                ]
-            },
-            "mic_8": {
-                "description": "8麦克风四角加边中点布局，兼顾覆盖范围和定位稳定性。",
-                "height_z": 1.20,
-                "microphones": [
-                    {"id": "M01", "position": [0.20, 0.20, 1.20]},
-                    {"id": "M02", "position": [1.20, 0.20, 1.20]},
-                    {"id": "M03", "position": [2.20, 0.20, 1.20]},
-                    {"id": "M04", "position": [0.20, 0.60, 1.20]},
-                    {"id": "M05", "position": [2.20, 0.60, 1.20]},
-                    {"id": "M06", "position": [0.20, 1.00, 1.20]},
-                    {"id": "M07", "position": [1.20, 1.00, 1.20]},
-                    {"id": "M08", "position": [2.20, 1.00, 1.20]},
-                ]
-            },
-            "mic_12": {
-                "description": "12麦克风三排四列布局，用于更密集的二维定位和后续波束形成实验。",
-                "height_z": 1.20,
-                "microphones": [
-                    {"id": "M01", "position": [0.20, 0.20, 1.20]},
-                    {"id": "M02", "position": [0.80, 0.20, 1.20]},
-                    {"id": "M03", "position": [1.60, 0.20, 1.20]},
-                    {"id": "M04", "position": [2.20, 0.20, 1.20]},
-
-                    {"id": "M05", "position": [0.20, 0.60, 1.20]},
-                    {"id": "M06", "position": [0.80, 0.60, 1.20]},
-                    {"id": "M07", "position": [1.60, 0.60, 1.20]},
-                    {"id": "M08", "position": [2.20, 0.60, 1.20]},
-
-                    {"id": "M09", "position": [0.20, 1.00, 1.20]},
-                    {"id": "M10", "position": [0.80, 1.00, 1.20]},
-                    {"id": "M11", "position": [1.60, 1.00, 1.20]},
-                    {"id": "M12", "position": [2.20, 1.00, 1.20]},
-                ]
-            }
+            "mic_4": make_layout(
+                "mic_4",
+                "4 麦克风四角布局，用于 E1 麦克风数量实验。",
+                mic_4,
+                layout_family="mic_count",
+                variable_for="E1_num_mics"
+            ),
+            "mic_6": make_layout(
+                "mic_6",
+                "6 麦克风两侧三点布局，用于 E1 麦克风数量实验。",
+                mic_6,
+                layout_family="mic_count",
+                variable_for="E1_num_mics"
+            ),
+            "mic_8": make_layout(
+                "mic_8",
+                "基准 8 麦克风鸡笼四周分布式布局。",
+                mic_8,
+                layout_family="mic_count",
+                variable_for="E1_num_mics_and_baseline"
+            ),
+            "mic_12": make_layout(
+                "mic_12",
+                "12 麦克风三排四列分布式布局，用于 E1 麦克风数量实验。",
+                mic_12,
+                layout_family="mic_count",
+                variable_for="E1_num_mics"
+            ),
+            "layout_corners_8": make_layout(
+                "layout_corners_8",
+                "8 麦克风四角强化布局，用于 E2 布局实验。",
+                layout_corners_8,
+                layout_family="layout_variant",
+                variable_for="E2_layout"
+            ),
+            "layout_sides_8": make_layout(
+                "layout_sides_8",
+                "8 麦克风两侧分布式布局，用于 E2 布局实验。",
+                layout_sides_8,
+                layout_family="layout_variant",
+                variable_for="E2_layout"
+            ),
+            "layout_single_side_8": make_layout(
+                "layout_single_side_8",
+                "8 麦克风单边线阵布局，用于 E2 布局实验。",
+                layout_single_side_8,
+                layout_family="layout_variant",
+                variable_for="E2_layout"
+            ),
+            "layout_compact_8": make_layout(
+                "layout_compact_8",
+                "8 麦克风中心集中阵列布局，用于 E2 布局实验。",
+                layout_compact_8,
+                layout_family="layout_variant",
+                variable_for="E2_layout"
+            ),
         }
     }
+
     return layouts
 
 
@@ -233,7 +423,7 @@ def validate_layouts(cage: Dict, mic_layouts: Dict) -> List[Dict]:
 
     for layout_name, layout_info in mic_layouts["layouts"].items():
         microphones = layout_info["microphones"]
-        expected_count = int(layout_name.split("_")[1])
+        expected_count = int(layout_info["expected_mic_count"])
         actual_count = len(microphones)
 
         if actual_count != expected_count:
@@ -246,10 +436,12 @@ def validate_layouts(cage: Dict, mic_layouts: Dict) -> List[Dict]:
             })
 
         seen_ids = set()
+        seen_positions = set()
 
-        for mic in microphones:
-            mic_id = mic["id"]
-            position = mic["position"]
+        for mic_info in microphones:
+            mic_id = mic_info["id"]
+            position = mic_info["position"]
+            pos_key = tuple(position)
 
             if mic_id in seen_ids:
                 results.append({
@@ -261,7 +453,18 @@ def validate_layouts(cage: Dict, mic_layouts: Dict) -> List[Dict]:
                 })
                 continue
 
+            if pos_key in seen_positions:
+                results.append({
+                    "layout": layout_name,
+                    "mic_id": mic_id,
+                    "position": position,
+                    "is_valid": False,
+                    "message": "麦克风坐标重复"
+                })
+                continue
+
             seen_ids.add(mic_id)
+            seen_positions.add(pos_key)
 
             ok, message = is_position_valid(position, valid_range)
 
@@ -289,23 +492,38 @@ def draw_cage_boundary(ax, cage: Dict):
     ys = [0, 0, width_y, width_y, 0]
 
     ax.plot(xs, ys, linewidth=2)
-    ax.set_xlim(-0.15, length_x + 0.15)
-    ax.set_ylim(-0.15, width_y + 0.15)
+    ax.set_xlim(-0.08, length_x + 0.08)
+    ax.set_ylim(-0.08, width_y + 0.08)
     ax.set_aspect("equal", adjustable="box")
 
 
-def plot_layouts_top_view(cage: Dict, mic_layouts: Dict, out_path: Path):
-    """绘制 4 / 6 / 8 / 12 麦克风俯视布局图。"""
+def plot_layout_group(
+    cage: Dict,
+    mic_layouts: Dict,
+    layout_names: List[str],
+    out_path: Path,
+    title: str
+):
+    """绘制指定布局组的俯视图。"""
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
-    layouts = mic_layouts["layouts"]
-    layout_names = ["mic_4", "mic_6", "mic_8", "mic_12"]
+    num_layouts = len(layout_names)
 
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8))
+    if num_layouts <= 4:
+        rows, cols = 2, 2
+    else:
+        rows, cols = 2, 4
+
+    fig, axes = plt.subplots(rows, cols, figsize=(4.8 * cols, 3.6 * rows))
     axes = axes.flatten()
 
+    for ax in axes:
+        ax.axis("off")
+
     for ax, layout_name in zip(axes, layout_names):
-        layout = layouts[layout_name]
+        ax.axis("on")
+
+        layout = mic_layouts["layouts"][layout_name]
         microphones = layout["microphones"]
 
         draw_cage_boundary(ax, cage)
@@ -318,14 +536,14 @@ def plot_layouts_top_view(cage: Dict, mic_layouts: Dict, out_path: Path):
         for m in microphones:
             mic_id = m["id"]
             x, y, z = m["position"]
-            ax.text(x + 0.03, y + 0.03, mic_id, fontsize=9)
+            ax.text(x + 0.015, y + 0.015, mic_id, fontsize=8)
 
         ax.set_title(f"{layout_name}: {len(microphones)} microphones")
         ax.set_xlabel("x / length direction (m)")
         ax.set_ylabel("y / width direction (m)")
         ax.grid(True, linestyle="--", alpha=0.5)
 
-    plt.suptitle("Top View of Microphone Layouts in Local Cage Coordinate System")
+    plt.suptitle(title)
     plt.tight_layout()
     plt.savefig(out_path, dpi=200)
     plt.close()
@@ -359,24 +577,46 @@ def write_validation_report(cage: Dict, mic_layouts: Dict, validation_results: L
     lines.append(f"- width_y：`{cage['dimensions']['width_y']} m`")
     lines.append(f"- height_z：`{cage['dimensions']['height_z']} m`")
     lines.append("")
+    lines.append("发声平面：")
+    lines.append("")
+    lines.append(f"- baseline_z：`{cage['source_plane']['baseline_z']} m`")
+    lines.append(f"- height_error_values：`{cage['source_plane']['height_error_values']}`")
+    lines.append("")
 
-    lines.append("## 2. 麦克风布局")
+    lines.append("## 2. 基准实验参数")
+    lines.append("")
+    params = cage["baseline_experiment_params"]
+    lines.append(f"- 采样率：`{params['fs']} Hz`")
+    lines.append(f"- 基准麦克风数：`{params['baseline_num_mics']}`")
+    lines.append(f"- 基准布局：`{params['baseline_layout']}`")
+    lines.append(f"- 基准 RT60：`{params['baseline_rt60_sec']} s`")
+    lines.append(f"- RT60 实验取值：`{params['rt60_values_sec']}`")
+    lines.append(f"- 基准 SNR：`{params['baseline_snr_db']} dB`")
+    lines.append(f"- SNR 实验取值：`{params['snr_values_db']}`")
+    lines.append(f"- 基准网格间距：`{params['baseline_grid_spacing_m']} m`")
+    lines.append(f"- 网格间距实验取值：`{params['grid_spacing_values_m']}`")
+    lines.append(f"- STFT：`n_fft={params['stft_n_fft']}, hop={params['stft_hop_length']}`")
+    lines.append("")
+
+    lines.append("## 3. 麦克风布局")
     lines.append("")
     for layout_name, layout_info in mic_layouts["layouts"].items():
         lines.append(f"### {layout_name}")
         lines.append("")
         lines.append(f"- 描述：{layout_info['description']}")
+        lines.append(f"- 布局类型：`{layout_info['layout_family']}`")
+        lines.append(f"- 对应变量：`{layout_info['variable_for']}`")
         lines.append(f"- 麦克风数量：{len(layout_info['microphones'])}")
         lines.append(f"- 默认高度：`{layout_info['height_z']} m`")
         lines.append("")
         lines.append("| mic_id | x | y | z |")
         lines.append("|---|---:|---:|---:|")
-        for mic in layout_info["microphones"]:
-            x, y, z = mic["position"]
-            lines.append(f"| {mic['id']} | {x:.2f} | {y:.2f} | {z:.2f} |")
+        for mic_info in layout_info["microphones"]:
+            x, y, z = mic_info["position"]
+            lines.append(f"| {mic_info['id']} | {x:.3f} | {y:.3f} | {z:.3f} |")
         lines.append("")
 
-    lines.append("## 3. 坐标合法性检查")
+    lines.append("## 4. 坐标合法性检查")
     lines.append("")
     lines.append(f"- 检查记录数：{total}")
     lines.append(f"- 合法记录数：{valid_count}")
@@ -399,11 +639,12 @@ def write_validation_report(cage: Dict, mic_layouts: Dict, validation_results: L
         )
 
     lines.append("")
-    lines.append("## 4. 输出文件")
+    lines.append("## 5. 输出文件")
     lines.append("")
     lines.append(f"- 鸡笼配置：`{CAGE_YAML.relative_to(ROOT)}`")
     lines.append(f"- 麦克风布局配置：`{MIC_LAYOUTS_YAML.relative_to(ROOT)}`")
-    lines.append(f"- 俯视布局图：`{LAYOUT_FIG.relative_to(ROOT)}`")
+    lines.append(f"- 麦克风数量布局图：`{MIC_COUNT_LAYOUT_FIG.relative_to(ROOT)}`")
+    lines.append(f"- 布局变量图：`{LAYOUT_VARIANTS_FIG.relative_to(ROOT)}`")
     lines.append(f"- 检查报告：`{VALIDATION_REPORT.relative_to(ROOT)}`")
     lines.append("")
 
@@ -451,11 +692,32 @@ def main():
         for r in invalid_results:
             print(r)
 
-    # 4. 绘制俯视布局图
-    plot_layouts_top_view(cage, mic_layouts, LAYOUT_FIG)
-    print(f"[OK] 已生成俯视布局图: {LAYOUT_FIG}")
+    # 4. 绘制 E1 麦克风数量布局图
+    plot_layout_group(
+        cage,
+        mic_layouts,
+        ["mic_4", "mic_6", "mic_8", "mic_12"],
+        MIC_COUNT_LAYOUT_FIG,
+        "E1 Microphone Count Layouts: 4 / 6 / 8 / 12"
+    )
+    print(f"[OK] 已生成麦克风数量布局图: {MIC_COUNT_LAYOUT_FIG}")
 
-    # 5. 写报告
+    # 5. 绘制 E2 布局变量图
+    plot_layout_group(
+        cage,
+        mic_layouts,
+        [
+            "layout_corners_8",
+            "layout_sides_8",
+            "layout_single_side_8",
+            "layout_compact_8",
+        ],
+        LAYOUT_VARIANTS_FIG,
+        "E2 Layout Variants: Corners / Sides / Single Side / Compact"
+    )
+    print(f"[OK] 已生成布局变量图: {LAYOUT_VARIANTS_FIG}")
+
+    # 6. 写报告
     write_validation_report(cage, mic_layouts, validation_results)
     print(f"[OK] 已生成检查报告: {VALIDATION_REPORT}")
 
@@ -463,7 +725,8 @@ def main():
     print("========== 处理完成 ==========")
     print(f"鸡笼配置: {CAGE_YAML}")
     print(f"麦克风布局配置: {MIC_LAYOUTS_YAML}")
-    print(f"布局图: {LAYOUT_FIG}")
+    print(f"麦克风数量布局图: {MIC_COUNT_LAYOUT_FIG}")
+    print(f"布局变量图: {LAYOUT_VARIANTS_FIG}")
     print(f"检查报告: {VALIDATION_REPORT}")
 
     if len(invalid_results) == 0:

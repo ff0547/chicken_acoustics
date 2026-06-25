@@ -1,4 +1,4 @@
-name: local_chicken_cage
+name: local_chicken_cage_paper_baseline
 unit: meter
 coordinate_system:
   origin: left_front_bottom_corner
@@ -7,53 +7,89 @@ coordinate_system:
   z_axis: height_direction_bottom_to_top
   description: 局部坐标系原点位于鸡笼左前下角，单位为米。
 dimensions:
-  length_x: 2.4
-  width_y: 1.2
-  height_z: 1.8
+  length_x: 1.2
+  width_y: 0.75
+  height_z: 0.6
 valid_range:
   x:
   - 0.0
-  - 2.4
+  - 1.2
   y:
   - 0.0
-  - 1.2
+  - 0.75
   z:
   - 0.0
-  - 1.8
+  - 0.6
+source_plane:
+  baseline_z: 0.35
+  height_error_values:
+  - 0.25
+  - 0.35
+  - 0.45
+  description: 后续仿真实验默认发声平面为 z=0.35 m，高度误差实验使用 0.25/0.35/0.45 m。
+baseline_experiment_params:
+  fs: 48000
+  baseline_num_mics: 8
+  baseline_layout: mic_8
+  baseline_layout_description: 鸡笼四周分布式 8 麦克风布局
+  baseline_rt60_sec: 0.3
+  rt60_values_sec:
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+  baseline_snr_db: 20
+  snr_values_db:
+  - 0
+  - 5
+  - 10
+  - 20
+  - 30
+  baseline_grid_spacing_m: 0.02
+  grid_spacing_values_m:
+  - 0.01
+  - 0.02
+  - 0.05
+  stft_n_fft: 2048
+  stft_hop_length: 512
+  stft_compare:
+    n_fft: 1024
+    hop_length: 256
 reference_points:
   left_front_bottom:
   - 0.0
   - 0.0
   - 0.0
   right_front_bottom:
-  - 2.4
+  - 1.2
   - 0.0
   - 0.0
   left_back_bottom:
   - 0.0
-  - 1.2
+  - 0.75
   - 0.0
   right_back_bottom:
-  - 2.4
   - 1.2
+  - 0.75
   - 0.0
   left_front_top:
   - 0.0
   - 0.0
-  - 1.8
+  - 0.6
   right_front_top:
-  - 2.4
+  - 1.2
   - 0.0
-  - 1.8
+  - 0.6
   left_back_top:
   - 0.0
-  - 1.2
-  - 1.8
+  - 0.75
+  - 0.6
   right_back_top:
-  - 2.4
   - 1.2
-  - 1.8
+  - 0.75
+  - 0.6
 notes:
 - 本配置用于第1周第4天坐标系与麦克风布局实验。
+- 鸡笼局部尺寸固定为 1.20 × 0.75 × 0.60 m。
 - 所有麦克风坐标必须位于 valid_range 指定范围内。
-- 后续 Pyroomacoustics 仿真可直接读取 dimensions 与 mic_layouts。
+- 后续 Pyroomacoustics 仿真必须读取本文件中的 dimensions、source_plane 和 baseline_experiment_params。
