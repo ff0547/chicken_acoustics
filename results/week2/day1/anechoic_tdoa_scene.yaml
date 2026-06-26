@@ -1,0 +1,26 @@
+task: week2_day1_gcc_phat_tdoa_validation
+script: scripts/day1.py
+scene_type: anechoic_single_source_direct_path
+fs: 48000
+speed_of_sound: 343.0
+cage_yaml: configs\week1\day4\cage.yaml
+mic_layouts_yaml: configs\week1\day4\mic_layouts.yaml
+mic_layout: mic_8
+source_position:
+- 0.42
+- 0.315
+- 0.35
+probe_signal:
+  type: deterministic_wideband_noise
+  duration_sec: 2.0
+  random_seed: 20260626
+gcc_phat:
+  interp: 32
+  main_pair_rule: max_abs_theoretical_tdoa
+  main_pair_error_threshold_samples: 1.0
+outputs:
+  tdoa_error_table: results\week2\11_gcc_phat\tdoa_error_table.csv
+  tdoa_error_curve: results\week2\11_gcc_phat\tdoa_error_curve.png
+  main_pair_gcc_curve: results\week2\11_gcc_phat\gcc_phat_main_pair_curve.png
+  report: results\week2\11_gcc_phat\gcc_phat_report.md
+note: 本脚本只完成 GCC-PHAT 与理论 TDOA 验证，不依赖 11_build_paper_sim_scenes.py。

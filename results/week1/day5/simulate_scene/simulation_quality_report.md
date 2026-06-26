@@ -34,7 +34,7 @@
 ## 4. 后续论文级实验衔接
 - 后续论文级实验将完整覆盖 E1～E10，并输出 localization_results.csv、separation_results.csv、experiment_summary.csv 和 daily_log.csv。
 
-当前 20 个场景不作为论文级统计实验结果。后续正式实验将由 `06_build_paper_sim_scenes.py` 扩展。
+当前 20 个场景不作为论文级统计实验结果。后续正式实验将由 `11_build_paper_sim_scenes.py` 扩展。
 
 后续建议：
 
