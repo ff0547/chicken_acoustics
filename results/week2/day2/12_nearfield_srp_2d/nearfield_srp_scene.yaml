@@ -1,0 +1,43 @@
+task: week2_day2_nearfield_srp_phat_2d
+script: scripts/12_nearfield_srp_2d.py
+scene_type: anechoic_single_source_direct_path
+fs: 48000
+speed_of_sound: 343.0
+cage_yaml: configs\week1\day4\cage.yaml
+mic_layouts_yaml: configs\week1\day4\mic_layouts.yaml
+mic_layout: mic_8
+source_position:
+- 0.42
+- 0.315
+- 0.0
+search_grid:
+  plane_z: 0.0
+  spacing_m: 0.02
+  margin_m: 0.02
+  x_min: 0.02
+  x_max: 1.18
+  y_min: 0.02
+  y_max: 0.7200000000000001
+  num_x: 59
+  num_y: 36
+  num_points: 2124
+gcc_phat:
+  interp: 32
+  num_pairs: 28
+  max_tau_samples: 178
+result:
+  pred_position:
+  - 0.42000000000000004
+  - 0.32
+  - 0.0
+  error_cm: 0.5000000000000004
+  threshold_cm: 5.0
+  pass: true
+outputs:
+  srp_heatmap: results\week2\day2\12_nearfield_srp_2d\srp_heatmap.png
+  srp_grid_result: results\week2\day2\12_nearfield_srp_2d\srp_grid_result.csv
+  srp_peak_result: results\week2\day2\12_nearfield_srp_2d\srp_peak_result.csv
+  gcc_pair_peak_table: results\week2\day2\12_nearfield_srp_2d\gcc_pair_peak_table.csv
+  tdoa_index_cache: results\week2\day2\12_nearfield_srp_2d\tdoa_index_cache.npz
+  report: results\week2\day2\12_nearfield_srp_2d\nearfield_srp_2d_report.md
+note: 本脚本完成第2周周二二维近场SRP-PHAT验证，成果放在 results/week2/day2/12_nearfield_srp_2d。

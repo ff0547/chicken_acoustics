@@ -1,0 +1,2 @@
+﻿true_x,true_y,true_z,pred_x,pred_y,pred_z,error_cm,threshold_cm,pass,grid_spacing_m,num_mics,num_pairs
+0.42,0.315,0.0,0.42000000000000004,0.32,0.0,0.5000000000000004,5.0,True,0.02,8,28
