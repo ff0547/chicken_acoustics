@@ -1,0 +1,71 @@
+task: week2_day3_e1_single_source_batch_localization
+script: scripts/13_single_source_batch.py
+experiment: E1_single_source_mic_count
+output_dir: results\week2\day3
+cage_yaml: configs\week1\day4\cage.yaml
+mic_layouts_yaml: configs\week1\day4\mic_layouts.yaml
+cage_dimensions:
+  length_x: 1.2
+  width_y: 0.75
+  height_z: 0.6
+coordinate_system:
+  x: length
+  y: depth
+  z: height
+fs: 48000
+speed_of_sound: 343.0
+source_plane_z: 0.35
+search_plane_z: 0.35
+rt60_sec: 0.3
+snr_db: 20.0
+grid_spacing_m: 0.02
+grid_margin_x: 0.08
+grid_margin_y: 0.08
+source_margin_x: 0.08
+source_margin_y: 0.08
+num_scenes_per_group: 100
+total_runs: 400
+robust_srp_phat:
+  interp: 16
+  analysis_duration_sec: 0.22
+  tdoa_score_window_samples: 2.0
+  smooth_passes: 1
+  use_positive_normalized_gcc: true
+  use_pair_reliability_weight: true
+  use_baseline_weight: true
+mic_layouts:
+- layout: mic_4
+  num_mics: 4
+- layout: mic_6
+  num_mics: 6
+- layout: mic_8
+  num_mics: 8
+- layout: mic_12
+  num_mics: 12
+pyroomacoustics:
+  absorption: 0.0700494894560237
+  max_order_raw: 219
+  max_order_used: 12
+  max_order_cap: 12
+metrics:
+- mean_error_cm
+- std_error_cm
+- median_error_cm
+- p90_error_cm
+- hit_rate_10cm
+- hit_rate_20cm
+- ci95_error_cm
+baseline_check:
+  baseline_layout: mic_8
+  mean_error_threshold_cm: 10.0
+  baseline_mean_error_cm: 5.25949108395212
+  pass: true
+outputs:
+  single_source_csv: results\week2\day3\single_source.csv
+  localization_results_csv: results\week2\day3\localization_results.csv
+  experiment_summary_csv: results\week2\day3\experiment_summary.csv
+  scene_positions_csv: results\week2\day3\single_source_positions.csv
+  cdf_png: results\week2\day3\single_source_error_cdf.png
+  spatial_error_png: results\week2\day3\single_source_spatial_error.png
+  report_md: results\week2\day3\e1_single_source_report.md
+simulation_boundary: 几何声学仿真不精确表达金属笼条、鸡体遮挡、散射、衍射、复杂设备噪声和独立 USB 麦克风时钟漂移。source_id 为场景内临时编号，不代表固定蛋鸡个体。
