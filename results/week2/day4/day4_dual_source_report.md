@@ -36,12 +36,12 @@
 
 | experiment_id | variable | value | n | num_mics | dual_hit_rate | miss_rate | false_alarm_rate | mean_error_cm | std_error_cm | median_error_cm | p90_error_cm | ci95_dual_hit_rate | pass_day4 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| E4_day4_baseline | source_distance | >=30cm | 100 | 8 | 0.8300 | 0.0950 | 0.0950 | 6.7541 | 8.6414 | 4.5338 | 9.7738 | 0.0736 | True |
+| E4_day4_baseline | source_distance | >=30cm | 100 | 8 | 0.9300 | 0.0350 | 0.0350 | 4.2250 | 2.6464 | 3.7608 | 7.5112 | 0.0500 | True |
 
 ## 5. 验收结论
 
 - 验收标准：`源间距 >= 30 cm 时，双源命中率 >= 0.80`
-- 当前双源命中率：`0.8300`
+- 当前双源命中率：`0.9300`
 - 是否通过：`True`
 
 ## 6. 输出文件
@@ -55,4 +55,4 @@
 
 ## 7. 运行时间
 
-- 总耗时：`170.80 s`
+- 总耗时：`160.95 s`

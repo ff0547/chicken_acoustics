@@ -22,15 +22,18 @@ num_pairs: 28
 num_scenes: 100
 hit_radius_m: 0.1
 temporal_sparse_events:
+  method: randomized_per_scene
   total_duration_sec: 1.1
-  source1_start_sec: 0.08
-  source2_start_sec: 0.62
+  burst_duration_sec: 0.18
+  min_event_gap_sec: 0.28
 frame_selection:
+  method: auto_energy_event_detection_nms
   frame_sec: 0.24
   hop_sec: 0.035
   max_active_frames: 8
-  min_frame_gap_sec: 0.12
   energy_threshold_rel: 0.06
+  frames_per_event: 2
+  min_event_gap_sec: 0.28
 hybrid_map:
   density_sigma_m: 0.045
   cluster_sigma_m: 0.04

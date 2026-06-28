@@ -3,7 +3,7 @@
 第2周 Day4：双源多峰检测——修正版完整代码
 
 方法名称：
-短时帧聚合 + 鲁棒聚类先验增强 + 局部极大值 + NMS + 匈牙利匹配
+自动事件检测短时帧聚合 + 鲁棒聚类先验增强 + 局部极大值 + NMS + 匈牙利匹配
 
 满足 Day4 要求：
 1. 双源场景；
@@ -262,6 +262,31 @@ def insert_signal(target: np.ndarray, source: np.ndarray, start_sample: int) -> 
     target[start_sample:end_sample] += source[:valid_len]
 
 
+def sample_dual_event_start_times(
+    rng: np.random.Generator,
+    total_duration_sec: float,
+    burst_duration_sec: float,
+    min_event_gap_sec: float,
+    edge_margin_sec: float = 0.04,
+    max_trials: int = 10000,
+) -> Tuple[float, float]:
+    """Sample two non-overlapping event start times for a dual-source scene."""
+    latest_start = float(total_duration_sec) - float(burst_duration_sec) - float(edge_margin_sec)
+    earliest_start = float(edge_margin_sec)
+
+    if latest_start <= earliest_start:
+        raise ValueError("total_duration_sec is too short for the event duration and margins.")
+
+    for _ in range(max_trials):
+        t1 = float(rng.uniform(earliest_start, latest_start))
+        t2 = float(rng.uniform(earliest_start, latest_start))
+
+        if abs(t2 - t1) >= float(min_event_gap_sec):
+            return tuple(sorted((t1, t2)))
+
+    raise RuntimeError("Unable to sample two event times with the requested temporal gap.")
+
+
 def make_temporal_sparse_dual_signals(
     scene_seed: int,
     fs: int,
@@ -373,44 +398,46 @@ def simulate_reverberant_noisy_dual_scene(
 # 6. 短时帧选择与逐帧定位
 # ============================================================
 
-def select_active_frame_starts(
+
+
+def select_auto_event_frame_starts(
     multichannel: np.ndarray,
     fs: int,
     frame_sec: float,
     hop_sec: float,
-    max_frames: int,
-    min_frame_gap_sec: float,
+    max_active_frames: int,
+    frames_per_event: int,
+    min_event_gap_sec: float,
     energy_threshold_rel: float,
 ) -> List[int]:
     """
-    按短时能量选择有效帧。
+    Automatically detect the main acoustic events from received channels only.
 
-    做法：
-    1. 滑窗计算每个时间帧的多通道平均能量；
-    2. 按能量从大到小排序；
-    3. 选择若干个时间上足够分离的高能帧；
-    4. 避免同一个声源事件附近选太多重复帧。
+    This function does not use the simulated source start times. It builds a
+    multichannel short-time energy envelope, smooths it, finds local maxima,
+    applies temporal NMS to event centers, then keeps high-energy frames around
+    the two strongest detected events.
     """
-    n_samples = multichannel.shape[1]
+    n_samples = int(multichannel.shape[1])
     frame_len = int(round(frame_sec * fs))
     hop_len = int(round(hop_sec * fs))
-    min_gap = int(round(min_frame_gap_sec * fs))
 
     if frame_len <= 0 or hop_len <= 0:
-        raise ValueError("frame_sec 和 hop_sec 必须大于 0。")
+        raise ValueError("frame_sec and hop_sec must be positive.")
 
     if n_samples < frame_len:
         return [0]
 
+    max_active_frames = max(int(max_active_frames), 1)
+    frames_per_event = max(int(frames_per_event), 1)
+    min_event_gap_sec = max(float(min_event_gap_sec), float(hop_sec))
+
     starts = list(range(0, n_samples - frame_len + 1, hop_len))
-    energies = []
+    energies = np.zeros(len(starts), dtype=np.float64)
 
-    for start in starts:
+    for idx, start in enumerate(starts):
         frame = multichannel[:, start:start + frame_len]
-        energy = float(np.mean(frame ** 2))
-        energies.append(energy)
-
-    energies = np.asarray(energies, dtype=np.float64)
+        energies[idx] = float(np.mean(frame ** 2))
 
     if len(energies) == 0:
         return [0]
@@ -419,51 +446,111 @@ def select_active_frame_starts(
     if max_energy <= 1e-12:
         return [0]
 
-    order = np.argsort(energies)[::-1]
-    selected: List[int] = []
+    smooth_width = max(3, int(round(0.08 / float(hop_sec))))
+    if smooth_width % 2 == 0:
+        smooth_width += 1
 
-    for idx in order:
-        start = starts[int(idx)]
-        energy = float(energies[int(idx)])
+    if len(energies) >= smooth_width:
+        kernel = np.ones(smooth_width, dtype=np.float64) / float(smooth_width)
+        smooth = np.convolve(energies, kernel, mode="same")
+    else:
+        smooth = energies.copy()
 
-        if energy < max_energy * energy_threshold_rel:
-            continue
+    smooth_max = float(np.max(smooth))
+    threshold = smooth_max * float(energy_threshold_rel)
 
-        too_close = False
+    local_peaks: List[int] = []
 
-        for old_start in selected:
-            if abs(start - old_start) < min_gap:
-                too_close = True
-                break
+    for idx in range(len(smooth)):
+        left = smooth[idx - 1] if idx > 0 else -np.inf
+        right = smooth[idx + 1] if idx + 1 < len(smooth) else -np.inf
 
-        if not too_close:
-            selected.append(start)
+        if smooth[idx] >= threshold and smooth[idx] >= left and smooth[idx] >= right:
+            local_peaks.append(idx)
 
-        if len(selected) >= max_frames:
+    if len(local_peaks) == 0:
+        local_peaks = [int(np.argmax(smooth))]
+
+    local_peaks.sort(key=lambda idx: float(smooth[idx]), reverse=True)
+
+    min_gap_frames = max(1, int(round(min_event_gap_sec / float(hop_sec))))
+    event_centers: List[int] = []
+
+    for idx in local_peaks:
+        if all(abs(idx - old_idx) >= min_gap_frames for old_idx in event_centers):
+            event_centers.append(int(idx))
+
+        if len(event_centers) >= SOURCE_COUNT:
             break
 
-    if len(selected) < 2:
-        selected = [starts[int(order[0])]]
+    if len(event_centers) < SOURCE_COUNT:
+        for idx in np.argsort(smooth)[::-1]:
+            idx = int(idx)
 
-        best_extra = None
-        best_score = -np.inf
+            if all(abs(idx - old_idx) >= min_gap_frames for old_idx in event_centers):
+                event_centers.append(idx)
 
-        for idx in order:
-            start = starts[int(idx)]
+            if len(event_centers) >= SOURCE_COUNT:
+                break
 
-            if abs(start - selected[0]) < min_gap:
+    if len(event_centers) == 0:
+        event_centers = [int(np.argmax(smooth))]
+
+    event_centers.sort()
+
+    selected_indices: List[int] = []
+    event_radius_frames = max(1, min_gap_frames // 2)
+
+    for event_idx in event_centers[:SOURCE_COUNT]:
+        lo = max(0, event_idx - event_radius_frames)
+        hi = min(len(starts), event_idx + event_radius_frames + 1)
+
+        onset_idx = int(event_idx)
+        onset_threshold = float(smooth[event_idx]) * 0.50
+
+        while onset_idx > lo and smooth[onset_idx - 1] >= onset_threshold:
+            onset_idx -= 1
+
+        if onset_idx == 0 and event_idx > 0:
+            candidate_indices = list(range(event_idx, hi)) + list(range(0, event_idx))
+        else:
+            candidate_indices = list(range(onset_idx, hi))
+
+        candidate_indices = [
+            idx for idx in candidate_indices
+            if lo <= idx < hi and smooth[idx] >= threshold
+        ]
+
+        if len(candidate_indices) == 0:
+            candidate_indices = list(range(lo, hi))
+
+        added = 0
+
+        for idx in candidate_indices:
+            if idx in selected_indices:
                 continue
 
-            score = float(energies[int(idx)])
-            if score > best_score:
-                best_score = score
-                best_extra = start
+            selected_indices.append(int(idx))
+            added += 1
 
-        if best_extra is not None:
-            selected.append(best_extra)
+            if added >= frames_per_event or len(selected_indices) >= max_active_frames:
+                break
 
-    selected = sorted(selected)
-    return selected
+        if len(selected_indices) >= max_active_frames:
+            break
+
+    if len(selected_indices) < SOURCE_COUNT:
+        for idx in np.argsort(energies)[::-1]:
+            idx = int(idx)
+
+            if idx not in selected_indices:
+                selected_indices.append(idx)
+
+            if len(selected_indices) >= SOURCE_COUNT:
+                break
+
+    selected_indices = sorted(set(selected_indices))[:max_active_frames]
+    return [starts[idx] for idx in selected_indices]
 
 
 def localize_active_frames(
@@ -1320,12 +1407,19 @@ def run_one_scene(
         source_z=args.source_z,
     )
 
+    source1_start_sec, source2_start_sec = sample_dual_event_start_times(
+        rng=rng,
+        total_duration_sec=args.total_duration_sec,
+        burst_duration_sec=day3.PROBE_DURATION_SEC,
+        min_event_gap_sec=args.min_event_gap_sec,
+    )
+
     source_signals = make_temporal_sparse_dual_signals(
         scene_seed=scene_seed,
         fs=day3.FS,
         total_duration_sec=args.total_duration_sec,
-        source1_start_sec=args.source1_start_sec,
-        source2_start_sec=args.source2_start_sec,
+        source1_start_sec=source1_start_sec,
+        source2_start_sec=source2_start_sec,
     )
 
     noise_seed = scene_seed + 800000
@@ -1342,13 +1436,14 @@ def run_one_scene(
         noise_seed=noise_seed,
     )
 
-    frame_starts = select_active_frame_starts(
+    frame_starts = select_auto_event_frame_starts(
         multichannel=multichannel,
         fs=day3.FS,
         frame_sec=args.frame_sec,
         hop_sec=args.hop_sec,
-        max_frames=args.max_active_frames,
-        min_frame_gap_sec=args.min_frame_gap_sec,
+        max_active_frames=args.max_active_frames,
+        frames_per_event=args.frames_per_event,
+        min_event_gap_sec=args.min_event_gap_sec,
         energy_threshold_rel=args.energy_threshold_rel,
     )
 
@@ -1476,6 +1571,10 @@ def run_one_scene(
         "source_plane_z": float(args.source_z),
         "search_plane_z": float(args.search_z),
 
+        "source1_start_sec": float(source1_start_sec),
+        "source2_start_sec": float(source2_start_sec),
+        "event_gap_sec": float(source2_start_sec - source1_start_sec),
+
         "source_distance_cm": float(source_dist_cm),
 
         "true1_x": float(true_xy[0, 0]),
@@ -1516,8 +1615,9 @@ def run_one_scene(
         "frame_sec": float(args.frame_sec),
         "hop_sec": float(args.hop_sec),
         "max_active_frames": int(args.max_active_frames),
-        "min_frame_gap_sec": float(args.min_frame_gap_sec),
         "energy_threshold_rel": float(args.energy_threshold_rel),
+        "frames_per_event": int(args.frames_per_event),
+        "min_event_gap_sec": float(args.min_event_gap_sec),
         "cluster_trim_radius_m": float(args.cluster_trim_radius_m),
     }
 
@@ -1702,15 +1802,14 @@ def parse_args() -> argparse.Namespace:
 
     # 双源事件时间结构：仍是一个双源场景，只是利用鸡叫短时稀疏性。
     parser.add_argument("--total-duration-sec", type=float, default=1.10)
-    parser.add_argument("--source1-start-sec", type=float, default=0.08)
-    parser.add_argument("--source2-start-sec", type=float, default=0.62)
 
     # 短时帧参数。
     parser.add_argument("--frame-sec", type=float, default=0.24)
     parser.add_argument("--hop-sec", type=float, default=0.035)
     parser.add_argument("--max-active-frames", type=int, default=8)
-    parser.add_argument("--min-frame-gap-sec", type=float, default=0.12)
     parser.add_argument("--energy-threshold-rel", type=float, default=0.06)
+    parser.add_argument("--frames-per-event", type=int, default=2)
+    parser.add_argument("--min-event-gap-sec", type=float, default=0.28)
 
     # 聚合图与聚类先验参数。
     parser.add_argument("--density-sigma-m", type=float, default=0.045)
@@ -1738,8 +1837,11 @@ def parse_args() -> argparse.Namespace:
     if abs(args.grid_spacing_m - day3.GRID_SPACING_M) > 1e-9:
         raise ValueError("Day4 基准脚本固定网格间距=0.02 m。网格间距消融放到后续。")
 
-    if args.source2_start_sec <= args.source1_start_sec:
-        raise ValueError("source2_start_sec 必须大于 source1_start_sec。")
+    if args.frames_per_event <= 0:
+        raise ValueError("frames_per_event 必须大于 0。")
+
+    if args.min_event_gap_sec <= 0:
+        raise ValueError("min_event_gap_sec 必须大于 0。")
 
     if args.density_weight < 0 or args.cluster_prior_weight < 0:
         raise ValueError("density_weight 和 cluster_prior_weight 不能为负。")
@@ -1768,7 +1870,7 @@ def main() -> None:
 
     print("=" * 80)
     print("[INFO] 第2周 Day4：双源多峰检测开始")
-    print("[INFO] 本版：短时帧聚合 + 聚类先验 + 局部极大值 + NMS + 匈牙利匹配")
+    print("[INFO] 本版：自动事件检测选帧 + 短时帧聚合 + 聚类先验 + 局部极大值 + NMS + 匈牙利匹配")
     print("=" * 80)
 
     print(f"[INFO] 项目根目录：{PROJECT_ROOT}")
@@ -1796,7 +1898,7 @@ def main() -> None:
     print(f"[INFO] SNR = {args.snr_db} dB")
     print(f"[INFO] 网格间距 = {args.grid_spacing_m * 100:.1f} cm")
     print(f"[INFO] 源间距要求 >= {args.min_source_distance_m * 100:.1f} cm")
-    print(f"[INFO] 双源事件时间：{args.source1_start_sec:.2f}s / {args.source2_start_sec:.2f}s")
+    print(f"[INFO] 双源事件时间：逐场随机采样，事件间隔 >= {args.min_event_gap_sec:.2f}s")
 
     absorption, max_order_used, max_order_raw = day3.compute_room_material_and_order(room_dim)
 
@@ -1886,16 +1988,19 @@ def main() -> None:
         "num_scenes": args.n_scenes,
         "hit_radius_m": args.hit_radius_m,
         "temporal_sparse_events": {
+            "method": "randomized_per_scene",
             "total_duration_sec": args.total_duration_sec,
-            "source1_start_sec": args.source1_start_sec,
-            "source2_start_sec": args.source2_start_sec,
+            "burst_duration_sec": day3.PROBE_DURATION_SEC,
+            "min_event_gap_sec": args.min_event_gap_sec,
         },
         "frame_selection": {
+            "method": "auto_energy_event_detection_nms",
             "frame_sec": args.frame_sec,
             "hop_sec": args.hop_sec,
             "max_active_frames": args.max_active_frames,
-            "min_frame_gap_sec": args.min_frame_gap_sec,
             "energy_threshold_rel": args.energy_threshold_rel,
+            "frames_per_event": args.frames_per_event,
+            "min_event_gap_sec": args.min_event_gap_sec,
         },
         "hybrid_map": {
             "density_sigma_m": args.density_sigma_m,
@@ -2003,7 +2108,7 @@ def main() -> None:
         print("  1. --cluster-prior-weight 0.85 --density-weight 0.15")
         print("  2. --cluster-sigma-m 0.040 --peak-threshold-rel 0.03")
         print("  3. --nms-radius-m 0.08 --cluster-trim-radius-m 0.12")
-        print("  4. --source2-start-sec 0.68 --total-duration-sec 1.20")
+        print("  4. --min-event-gap-sec 0.30 --total-duration-sec 1.20")
 
     print("\n[OUTPUT]")
     print(f"dual_source.csv: {DUAL_SOURCE_CSV}")
