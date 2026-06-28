@@ -1,0 +1,55 @@
+task: week2_day4_dual_source_multipeak_detection
+script: scripts/14_dual_source_multipeak.py
+based_on: scripts/13_single_source_batch.py
+method: short_time_srp_clustering_prior_localmax_nms
+output_dir: results\week2\day4
+cage_dimensions:
+  length_x: 1.2
+  width_y: 0.75
+  height_z: 0.6
+fs: 48000
+speed_of_sound: 343.0
+source_plane_z: 0.35
+search_plane_z: 0.35
+rt60_sec: 0.3
+snr_db: 20.0
+grid_spacing_m: 0.02
+source_count: 2
+min_source_distance_m: 0.3
+layout_name: mic_8
+num_mics: 8
+num_pairs: 28
+num_scenes: 100
+hit_radius_m: 0.1
+temporal_sparse_events:
+  total_duration_sec: 1.1
+  source1_start_sec: 0.08
+  source2_start_sec: 0.62
+frame_selection:
+  frame_sec: 0.24
+  hop_sec: 0.035
+  max_active_frames: 8
+  min_frame_gap_sec: 0.12
+  energy_threshold_rel: 0.06
+hybrid_map:
+  density_sigma_m: 0.045
+  cluster_sigma_m: 0.04
+  cluster_trim_radius_m: 0.12
+  density_weight: 0.15
+  cluster_prior_weight: 0.85
+  hybrid_score_gamma: 1.2
+peak_detection:
+  local_maxima: true
+  nms: true
+  peak_threshold_rel: 0.03
+  nms_radius_m: 0.08
+  min_pred_pair_distance_m: 0.18
+  max_peak_candidates: 30
+  top_k: 2
+matching: hungarian
+day4_pass_threshold: 0.8
+pyroomacoustics:
+  absorption: 0.0700494894560237
+  max_order_raw: 219
+  max_order_used: 12
+  max_order_cap: 12

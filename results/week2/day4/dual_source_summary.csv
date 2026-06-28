@@ -1,0 +1,2 @@
+﻿experiment_id,variable,value,n,mic_layout,num_mics,rt60,snr,grid_spacing_m,source_count,mean_source_distance_cm,min_source_distance_cm,dual_hit_rate,ci95_dual_hit_rate,miss_rate,false_alarm_rate,mean_error_cm,std_error_cm,median_error_cm,p90_error_cm,max_error_p90_cm,ci95_error_cm,mean_active_frames,pass_day4
+E4_day4_baseline,source_distance,>=30cm,100,mic_8,8,0.3,20.0,0.02,2,53.87840052121431,30.85826795309725,0.83,0.07362402868629236,0.095,0.095,6.75405990385141,8.641416115303752,4.53379395764093,9.773839307782916,15.77480361610214,1.6937175585995352,5.0,True
