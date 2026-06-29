@@ -1,0 +1,49 @@
+task: week2_day5_localization_ablation
+script: scripts/15_localization_ablation.py
+n_scenes_per_condition: 100
+seed: 20260629
+default_params:
+  layout: mic_8
+  snr_db: 20.0
+  rt60_sec: 0.3
+  grid_spacing_m: 0.02
+  hit_radius_m: 0.1
+  source_z: 0.35
+  search_z: 0.35
+experiments:
+  E1_num_mics:
+  - mic_4
+  - mic_6
+  - mic_8
+  - mic_12
+  E2_layout:
+  - layout_corners_8
+  - layout_sides_8
+  - layout_single_side_8
+  - layout_compact_8
+  E3_snr_db:
+  - 0.0
+  - 5.0
+  - 10.0
+  - 20.0
+  - 30.0
+  E4_dual_distance_cm:
+  - 10.0
+  - 20.0
+  - 30.0
+  - 50.0
+  - 80.0
+  E5_rt60_sec:
+  - 0.1
+  - 0.3
+  - 0.5
+  - 0.7
+outputs:
+  scene_csv: results\week2\day5\localization_ablation_scenes.csv
+  summary_csv: results\week2\day5\localization_ablation.csv
+  week2_md: results\week2\week2.md
+  figures:
+  - results\week2\day5\fig_e1_num_mics.png
+  - results\week2\day5\fig_e2_layout.png
+  - results\week2\day5\fig_e3_noise_reverb.png
+  - results\week2\day5\fig_e4_dual_distance.png
