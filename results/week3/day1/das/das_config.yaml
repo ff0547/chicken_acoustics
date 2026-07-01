@@ -1,0 +1,11 @@
+task: week3_day1_das_baseline
+n_scenes: 100
+layout: mic_8
+fs: 48000
+rt60_sec: 0.3
+snr_db: 20.0
+grid_spacing_m: 0.02
+source_mode: probe
+seed: 20260701
+source_z: 0.35
+search_z: 0.35
